@@ -19,7 +19,7 @@ class CAHNRSWP_Legacy_Content_Update {
 	 * Add options page link to the menu.
 	 */
 	public function admin_menu() {
-		add_submenu_page( 'options-general.php', 'Update Legacy Layouts', 'Update Legacy Layouts', 'manage_options', 'update-legacy-layouts', array( $this, 'update_legacy_layouts_page' ) );
+		add_submenu_page( 'tools.php', 'Update Legacy Layouts', 'Update Legacy Layouts', 'manage_options', 'update-legacy-layouts', array( $this, 'update_legacy_layouts_page' ) );
 	}
 
 	/**
@@ -74,19 +74,24 @@ class CAHNRSWP_Legacy_Content_Update {
 
 					// Row.
 					$pb_content = '[row layout="' . $layout . '" padding="pad-ends" gutter="gutter"]';
+
 					// Column One.
 					//$pb_content .= '[column verticalbleed="0"][textblock]' . "\n\n" . $pieces[0] . "\n<!--more-->\n" . $pieces[1] . "\n\n" . '[/textblock][/column]';
 					$pb_content .= '[column][textblock]' . "\n\n" . $pieces[0] . "\n\n" . $pieces[1] . "\n\n" . '[/textblock][/column]';
+
 					// Column Two (we have at least two if we're even in here).
 					$pb_content .= '[column][textblock]' . "\n\n" . $pieces[2] . "\n\n" . '[/textblock][/column]';
+
 					// Column Three.
 					if ( $pieces[3] && ( 'thirds' == $layout || 'quarters' == $layout ) ) {
 						$pb_content .= '[column][textblock]' . "\n\n" . $pieces[3] . "\n\n" . '[/textblock][/column]';
 					}
+
 					// Column Four.
 					if ( $pieces[4] && 'quarters' === $layout ) {
 						$pb_content .= '[column][textblock]' . "\n\n" . $pieces[4] . "\n\n" . '[/textblock][/column]';
 					}
+
 					// Close row.
 					$pb_content .= '[/row]';
 
