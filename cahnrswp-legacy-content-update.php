@@ -263,8 +263,29 @@ class CAHNRSWP_Legacy_Content_Update {
 									$title = '<a href="' . get_the_permalink( $page_id ) . '" target="_blank">' . get_the_title( $page_id ) . '</a>';
 									echo '<li>' . ( ( isset( $_POST['submit'] ) ) ? '<strong>' . $title . '</strong> updated' : $title ) . '</li>';
 								}
+								// Could be helpful to do something like this, but not particularly necessary.
+								/*if ( ! isset( $_POST['submit'] ) ) {
+									add_thickbox();
+									?><p>The following pages have been identified as having legacy layouts. Click the title(s) to see what the updated version would look like.</p><?php
+								}
+								foreach ( $legacy_layout_pages as $legacy_layout_page ) {
+									if ( isset( $_POST['submit'] ) ) :
+									?>
+										<strong><?php echo get_the_title( $legacy_layout_page ); ?></strong> updated<br />
+									<?php else: ?>
+										<div id="page-<?php echo $legacy_layout_page; ?>-updated" class="updated-page-thickbox">
+											// Would have to get $pb_content in here somehow.
+										</div>
+										<a href="#TB_inline?width=900&height=700&inlineId=page-<?php echo $legacy_layout_page; ?>-updated" class="thickbox"><?php echo get_the_title( $legacy_layout_page ); ?></a><br />
+									<?php
+									endif;
+								}*/
 							?>
 							</ul>
+							<?php // Could allow for updating content types separately (change respective `isset( $_POST['submit']` conditions). ?>
+							<?php /*if ( ! isset( $_POST['update_legacy_page_layouts'] ) ) : ?>
+							<input id="update_legacy_page_layouts" type="checkbox" name="update_legacy_page_layouts" /> <label for="update_legacy_page_layouts">Update pages</label>
+							<?php endif;*/ ?>
 						</td>
 					</tr>
 					<?php endif; ?>
