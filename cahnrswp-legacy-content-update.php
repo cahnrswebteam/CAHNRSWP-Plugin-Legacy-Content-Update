@@ -262,7 +262,7 @@ class CAHNRSWP_Legacy_Content_Update {
 							<ul>
 							<?php
 								foreach ( $legacy_layout_pages as $page_id ) {
-									$title = '<a href="' . get_the_permalink( $page_id ) . '" target="_blank">' . get_the_title( $page_id ) . '</a>';
+									$title = '<a href="' . get_edit_post_link( $page_id ) . '" target="_blank">' . get_the_title( $page_id ) . '</a>';
 									echo '<li>' . ( ( isset( $_POST['submit'] ) ) ? '<strong>' . $title . '</strong> updated' : $title ) . '</li>';
 								}
 								// Could be helpful to do something like this, but not particularly necessary.
@@ -299,7 +299,7 @@ class CAHNRSWP_Legacy_Content_Update {
 							<ul>
 							<?php
 								foreach ( $legacy_layout_posts as $post_id ) {
-									$title = '<a href="' . get_the_permalink( $post_id ) . '" target="_blank">' . get_the_title( $post_id ) . '</a>';
+									$title = '<a href="' . get_edit_post_link( $post_id ) . '" target="_blank">' . get_the_title( $post_id ) . '</a>';
 									echo '<li>' . ( ( isset( $_POST['submit'] ) ) ? '<strong>' . $title . '</strong> updated' : $title ) . '</li>';
 								}
 							?>
