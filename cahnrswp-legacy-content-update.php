@@ -36,13 +36,13 @@ class CAHNRSWP_Legacy_Content_Update {
 		$legacy_layout_posts = array();
 		foreach ( $posts_array as $post ) {
 			$more_tags = '';
-			$layout_meta = '';
+			$wip_layout_meta = '';
 			$pieces = '';
 			$pb_content = '';
 			//setup_postdata( $post ); // Doesn't seem necessary
 			$more_tags = (int) substr_count( $post->post_content, '<!--more-->' );
-			$layout_meta = get_post_meta( $post->ID, '_layout', true );
-			if ( $more_tags > 1 && $layout_meta ) { // Check for two More tags, as the first is not used for layout.
+			$wip_layout_meta = get_post_meta( $post->ID, '_layout', true );
+			if ( $more_tags > 1 && $wip_layout_meta ) { // Check for two More tags, as the first is not used for layout.
 
 				// If the post seems to have a layout from the legacy WSU theme, add it to the $legacy_layout_posts array.
 				$legacy_layout_posts[] = $post->ID;
@@ -52,7 +52,7 @@ class CAHNRSWP_Legacy_Content_Update {
 
 					$pieces = explode( '<!--more-->', $post->post_content );
 
-					switch ( $layout_meta['layout'] ) {
+					switch ( $wip_layout_meta['layout'] ) {
 						case '0':
 							$layout = 'single';
 							break;
@@ -119,14 +119,16 @@ class CAHNRSWP_Legacy_Content_Update {
 
 		foreach ( $pages_array as $page ) {
 			$more_tags = '';
-			$layout_meta = '';
-			$dynamic_meta = '';
+			$wip_layout_meta = '';
+			$wip_dynamic_meta = '';
 			$pieces = '';
 			$pb_content = '';
 			$more_tags = (int) substr_count( $page->post_content, '<!--more-->' );
-			$layout_meta = get_post_meta( $page->ID, '_layout', true );
-			$dynamic_meta = get_post_meta( $page->ID, '_dynamic', true );
-			if ( $more_tags > 0 || ( $layout_meta || $dynamic_meta ) ) { // Presumably, any More tag in a page is for layout.
+			$wip_layout_meta = get_post_meta( $page->ID, '_layout', true );
+			$wip_dynamic_meta = get_post_meta( $page->ID, '_dynamic', true );
+
+			// WIP/WSU theme
+			if ( $more_tags > 0 || ( $wip_layout_meta || $wip_dynamic_meta ) ) { // Presumably, any More tag in a page is for layout.
 
 				// If the page seems to have a layout from the legacy WSU theme, add it to the $legacy_layout_pages array.
 				$legacy_layout_pages[] = $page->ID;
@@ -136,7 +138,7 @@ class CAHNRSWP_Legacy_Content_Update {
 
 					$pieces = explode( '<!--more-->', $page->post_content );
 
-					switch ( $layout_meta['layout'] ) {
+					switch ( $wip_layout_meta['layout'] ) {
 						case '0':
 							$layout = 'single';
 							break;
@@ -157,28 +159,28 @@ class CAHNRSWP_Legacy_Content_Update {
 					}
 
 					// Slideshow.
-					if ( 'dynamic' == $layout_meta['page_type'] && 'show' == $layout_meta['slideshow'] && $dynamic_meta['wipHomeArray'] ) {
+					if ( 'dynamic' == $wip_layout_meta['page_type'] && 'show' == $wip_layout_meta['slideshow'] && $wip_dynamic_meta['wipHomeArray'] ) {
 						$pb_content .= '[row layout="single" padding="pad-bottom" gutter="gutter"]';
-						$pb_content .= $this->dynamic_column( $dynamic_meta['wipHomeArray'], array(), $dynamic_meta );
+						$pb_content .= $this->wip_dynamic_column( $wip_dynamic_meta['wipHomeArray'], array(), $wip_dynamic_meta );
 						$pb_content .= '[/row]';
 					}
 
 					// Row.
 					$pb_content .= '[row layout="' . $layout . '" padding="pad-ends" gutter="gutter"]';
 
-					if ( 'dynamic' == $layout_meta['page_type'] && $dynamic_meta ) {
+					if ( 'dynamic' == $wip_layout_meta['page_type'] && $wip_dynamic_meta ) {
 
 						// Column one.
-						if ( $dynamic_meta['wipMainArray'] ) {
-							$pb_content .= $this->dynamic_column( $dynamic_meta['wipMainArray'], $pieces, $dynamic_meta );
+						if ( $wip_dynamic_meta['wipMainArray'] ) {
+							$pb_content .= $this->wip_dynamic_column( $wip_dynamic_meta['wipMainArray'], $pieces, $wip_dynamic_meta );
 						} else {// Sometimes a page will be set as dynamic but not have page content set in the columns...
 							$pb_content .= '[column][textblock]' . "\n\n" . $pieces[0] . "\n\n" . '[/textblock][/column]';
 						}
 
 						// Column two.
 						if ( 'side-right' == $layout || 'halves' == $layout || 'thirds' == $layout || 'quarters' == $layout ) {
-							if ( $dynamic_meta['wipSecondaryArray'] ) {
-								$pb_content .= $this->dynamic_column( $dynamic_meta['wipSecondaryArray'], $pieces, $dynamic_meta );
+							if ( $wip_dynamic_meta['wipSecondaryArray'] ) {
+								$pb_content .= $this->wip_dynamic_column( $wip_dynamic_meta['wipSecondaryArray'], $pieces, $wip_dynamic_meta );
 							} else {
 								// Column two (we have at least two if we're even in here).
 								$pb_content .= '[column][textblock]' . "\n\n" . $pieces[1] . "\n\n" . '[/textblock][/column]';
@@ -187,8 +189,8 @@ class CAHNRSWP_Legacy_Content_Update {
 
 						// Column three.
 						if ( 'thirds' == $layout || 'quarters' == $layout ) {
-							if ( $dynamic_meta['wipAdditionalArray'] ) {
-								$pb_content .= $this->dynamic_column( $dynamic_meta['wipAdditionalArray'], $pieces, $dynamic_meta );
+							if ( $wip_dynamic_meta['wipAdditionalArray'] ) {
+								$pb_content .= $this->wip_dynamic_column( $wip_dynamic_meta['wipAdditionalArray'], $pieces, $wip_dynamic_meta );
 							} else if ( $pieces[2] ) {
 								$pb_content .= '[column][textblock]' . "\n\n" . $pieces[2] . "\n\n" . '[/textblock][/column]';
 							}
@@ -196,8 +198,8 @@ class CAHNRSWP_Legacy_Content_Update {
 
 						// Column four.
 						if ( 'quarters' == $layout ) {
-							if ( $dynamic_meta['wipFourthArray'] ) {
-								$pb_content .= $this->dynamic_column( $dynamic_meta['wipFourthArray'], $pieces, $dynamic_meta );
+							if ( $wip_dynamic_meta['wipFourthArray'] ) {
+								$pb_content .= $this->wip_dynamic_column( $wip_dynamic_meta['wipFourthArray'], $pieces, $wip_dynamic_meta );
 							} else if ( $pieces[3] ) {
 								$pb_content .= '[column][textblock]' . "\n\n" . $pieces[3] . "\n\n" . '[/textblock][/column]';
 							}
@@ -328,7 +330,7 @@ class CAHNRSWP_Legacy_Content_Update {
 	 *
 	 * @return string Column data parsed into shortcode format.
 	 */
-	public function dynamic_column( $column_array, $pieces, $dynamic_meta ) {
+	public function wip_dynamic_column( $column_array, $pieces, $dynamic_meta ) {
 
 		$content_types = explode( ',', $column_array );
 
