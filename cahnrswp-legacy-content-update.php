@@ -35,16 +35,52 @@ class CAHNRSWP_Legacy_Content_Update {
 
 		$legacy_layout_posts = array();
 		foreach ( $posts_array as $post ) {
-			$more_tags = '';
-			$wip_layout_meta = '';
-			$pieces = '';
-			$pb_content = '';
+			$pb1_layout_meta  = '';
+			$pb1_content_meta = '';
+			$more_tags        = '';
+			$wip_layout_meta  = '';
+			$pieces           = '';
+			$pb_content       = '';
+			$pb1_layout_meta  = get_post_meta( $post->ID, '_cahnrs_layout', true );
+			$pb1_content_meta = get_post_meta( $page->ID, '_pagebuilder_editor', true );
+			$more_tags        = (int) substr_count( $post->post_content, '<!--more-->' );
+			$wip_layout_meta  = get_post_meta( $post->ID, '_layout', true );
 			//setup_postdata( $post ); // Doesn't seem necessary
-			$more_tags = (int) substr_count( $post->post_content, '<!--more-->' );
-			$wip_layout_meta = get_post_meta( $post->ID, '_layout', true );
-			if ( $more_tags > 1 && $wip_layout_meta ) { // Check for two More tags, as the first is not used for layout.
 
-				// If the post seems to have a layout from the legacy WSU theme, add it to the $legacy_layout_posts array.
+			// Pagebuilder generation 1.
+			if ( $pb1_layout_meta ) {
+
+				// Add post to the $legacy_layout_posts array.
+				$legacy_layout_posts[] = $post->ID;
+
+				// Update posts.
+				if ( isset( $_POST['submit'] ) ) {
+
+					// Send stuff to pb1 function for processing.
+					$pb_content .= $this->pb1_layout( $pb1_layout_meta, $pb1_content_meta );
+
+					// Update post with shortcoded content.
+					wp_update_post( array(
+						'ID'           => $post->ID,
+						'post_content' => $pb_content,
+					) );
+
+					// Delete WIP layout meta (it might be in there).
+					delete_post_meta( $post->ID, '_layout' );
+
+					// Delete pb1 meta.
+					delete_post_meta( $post->ID, '_cahnrs_layout' );
+					delete_post_meta( $post->ID, '_pagebuilder_settings' );
+					delete_post_meta( $post->ID, '_pagebuilder_editor' );
+
+				}
+
+			}
+
+			// WIP/WSU theme/
+			if ( ! $pb1_layout_meta && ( $more_tags > 1 && $wip_layout_meta ) ) { // Check for two More tags, as the first is not used for layout.
+
+				// Add post to the $legacy_layout_posts array.
 				$legacy_layout_posts[] = $post->ID;
 
 				// Update posts.
@@ -95,7 +131,7 @@ class CAHNRSWP_Legacy_Content_Update {
 					// Close row.
 					$pb_content .= '[/row]';
 
-					// Update post with short coded content.
+					// Update post with shortcoded content.
 					wp_update_post( array(
 						'ID'           => $post->ID,
 						'post_content' => $pb_content,
@@ -118,19 +154,54 @@ class CAHNRSWP_Legacy_Content_Update {
 		$legacy_layout_pages = array();
 
 		foreach ( $pages_array as $page ) {
-			$more_tags = '';
-			$wip_layout_meta = '';
+			$pb1_layout_meta  = '';
+			$pb1_content_meta = '';
+			$more_tags        = '';
+			$wip_layout_meta  = '';
 			$wip_dynamic_meta = '';
-			$pieces = '';
-			$pb_content = '';
-			$more_tags = (int) substr_count( $page->post_content, '<!--more-->' );
-			$wip_layout_meta = get_post_meta( $page->ID, '_layout', true );
+			$pieces           = '';
+			$pb_content       = '';
+			$pb1_layout_meta  = get_post_meta( $page->ID, '_cahnrs_layout', true );
+			$pb1_content_meta = get_post_meta( $page->ID, '_pagebuilder_editor', true );
+			$more_tags        = (int) substr_count( $page->post_content, '<!--more-->' );
+			$wip_layout_meta  = get_post_meta( $page->ID, '_layout', true );
 			$wip_dynamic_meta = get_post_meta( $page->ID, '_dynamic', true );
 
-			// WIP/WSU theme
-			if ( $more_tags > 0 || ( $wip_layout_meta || $wip_dynamic_meta ) ) { // Presumably, any More tag in a page is for layout.
+			// Pagebuilder generation 1.
+			if ( $pb1_layout_meta ) {
 
-				// If the page seems to have a layout from the legacy WSU theme, add it to the $legacy_layout_pages array.
+				// Add page to the $legacy_layout_pages array.
+				$legacy_layout_pages[] = $page->ID;
+
+				// Update posts.
+				if ( isset( $_POST['submit'] ) ) {
+
+					// Send stuff to pb1 function for processing.
+					$pb_content .= $this->pb1_layout( $pb1_layout_meta, $pb1_content_meta );
+
+					// Update post with shortcoded content.
+					wp_update_post( array(
+						'ID'           => $page->ID,
+						'post_content' => $pb_content,
+					) );
+
+					// Delete WIP layout meta (it might be in there).
+					delete_post_meta( $post->ID, '_layout' );
+					delete_post_meta( $page->ID, '_dynamic' );
+
+					// Delete pb1 meta.
+					delete_post_meta( $post->ID, '_cahnrs_layout' );
+					delete_post_meta( $post->ID, '_pagebuilder_settings' );
+					delete_post_meta( $post->ID, '_pagebuilder_editor' );
+
+				}
+
+			}
+
+			// WIP/WSU theme.
+			if ( ! $pb1_layout_meta && ( $more_tags > 0 || ( $wip_layout_meta || $wip_dynamic_meta ) ) ) { // Presumably, any More tag in a page is for layout.
+
+				// Add page to the $legacy_layout_pages array.
 				$legacy_layout_pages[] = $page->ID;
 
 				// Update pages
@@ -277,6 +348,7 @@ class CAHNRSWP_Legacy_Content_Update {
 									<?php else: ?>
 										<div id="page-<?php echo $legacy_layout_page; ?>-updated" class="updated-page-thickbox">
 											// Would have to get $pb_content in here somehow.
+											// Would be really cool to add a button here to allow for individual page/post updating...
 										</div>
 										<a href="#TB_inline?width=900&height=700&inlineId=page-<?php echo $legacy_layout_page; ?>-updated" class="thickbox"><?php echo get_the_title( $legacy_layout_page ); ?></a><br />
 									<?php
@@ -284,7 +356,10 @@ class CAHNRSWP_Legacy_Content_Update {
 								}*/
 							?>
 							</ul>
-							<?php // Could allow for updating content types separately (change respective `isset( $_POST['submit']` conditions). ?>
+							<?php // Random notes...
+              	// Could allow for updating content types separately (change respective `isset( $_POST['submit']` conditions). See below.
+								// Could also add a checkbox for each page/post to allow updating them individually...
+							?>
 							<?php /*if ( ! isset( $_POST['update_legacy_page_layouts'] ) ) : ?>
 							<input id="update_legacy_page_layouts" type="checkbox" name="update_legacy_page_layouts" /> <label for="update_legacy_page_layouts">Update pages</label>
 							<?php endif;*/ ?>
@@ -321,8 +396,127 @@ class CAHNRSWP_Legacy_Content_Update {
 		<?php
 	}
 
+	/** Parse Page Builder generation 1 data into shortcode format.
+	 *
+	 * @param array $layout_meta  The layout meta.
+	 * $param array $content_meta `Native` content.
+	 *
+	 * @return string Layout data parsed into shortcodes.
+	 */
+	public function pb1_layout( $layout_meta, $content_meta ) {
+
+		$content = '';
+
+		foreach ( $layout_meta as $row ) {
+
+			// Modify this to check if the header/footer is empty.
+			if ( 'row-100' === $row['id'] || 'row-200' === $row['id'] ) {
+				continue;
+			}
+
+			switch ( $row['layout'] ) {
+				case 'pagbuilder-layout-full':
+					$layout = 'single';
+					break;
+				case 'pagbuilder-layout-aside':
+					$layout = 'side-right';
+					break;
+				case 'pagbuilder-layout-half':
+					$layout = 'halves';
+					break;
+				case 'pagbuilder-layout-thirds':
+				case 'pagbuilder-layout-third-left':
+				case 'pagbuilder-layout-third-right':
+					$layout = 'thirds';
+					break;
+				case 'pagbuilder-layout-fourths':
+					$layout = 'quarters';
+					break;
+				default:
+					$layout = 'single';
+			}
+
+			$content .= '<p>[row layout="' . $layout . '" padding="pad-ends" gutter="gutter"]';
+
+			foreach ( array_reverse( $row['columns'] ) as $column ) { // array_reverse based on export from CAHNRS...
+
+				$content .= '[column]';
+
+					foreach ( $column['items'] as $item ) {
+
+						// Maybe a switch would be better here.
+
+						// `Native` content.
+						if ( 'page_content' === $item['id'] || 'content_block' === $item['id'] ) {
+							$content .= '[textblock]';
+							if ( 'page_content' === $item['id'] ) {
+								$content .= $content_meta['primary_content'];
+							} else {
+								$content .= $content_meta['content_block-' . $item['instance']];
+							}
+							$content .= '[/textblock]</br />';
+						}
+
+						// Action items.
+						if ( 'cahnrs_action_item' === $item['id'] ) {
+							if ( $item['settings']['name_1'] && $item['settings']['url_1'] ) {
+								$content .= '[action label="' . $item['settings']['name_1'] . '" link="' . $item['settings']['url_1'] . '"][/action]';
+							}
+							if ( $item['settings']['name_2'] && $item['settings']['url_2'] ) {
+								$content .= '[action label="' . $item['settings']['name_2'] . '" link="' . $item['settings']['url_2'] . '"][/action]';
+							}
+							if ( $item['settings']['name_3'] && $item['settings']['url_3'] ) {
+								$content .= '[action label="' . $item['settings']['name_3'] . '" link="' . $item['settings']['url_3'] . '"][/action]';
+							}
+						}
+// Build all these out!
+						// A-Z.
+						if ( 'cahnrs_az_index' === $item['id'] ) {}
+
+						// Feed, FAQs, etc. ('CAHNRS_feed_widget' is present in an export from CAHNRS, but I'll be darned if I can find it anywhere.)
+						if ( 'cahnrs_faqs' === $item['id'] || 'cahnrs_feed' === $item['id'] || 'CAHNRS_feed_widget' === $item['id'] ) {
+							$content .= '[list ][/list]';
+						}
+
+						// iFrame.
+						if ( 'cahnrs_iframe' === $item['id'] ) {}
+
+						// Existing content.
+						if ( 'cahnrs_insert_existing' === $item['id'] ) {}
+						
+						// Item.
+						if ( 'cahnrs_insert_item' === $item['id'] ) {}
+						
+						// Video.
+						if ( 'cahnrs_insert_video' === $item['id'] ) {}
+
+						// Slideshow (ditto the comment on line 475.)
+						if ( 'cahnrs_slideshow' === $item['id'] || 'CAHNRS_Slideshow_widget' === $item['id'] ) {}
+
+						// Gallery.
+						if ( 'cahnrs_custom_gallery_widget' === $item['id'] ) {
+							$content .= '[postgallery ][/postgallery]';
+						}
+
+						// Facebook.
+						if ( 'cahnrs_facebook' === $item['id'] ) {}
+
+					}
+
+				$content .= '[/column]';
+
+			}
+
+			$content .= '[/row]</p>';
+
+		}
+		
+		return $content;
+
+	}
+
 	/**
-	 * Modify ouput of dynamic columns.
+	 * Parse WSU Legacy theme column data into shortcode format.
 	 *
 	 * @param array $column_array Content types included in this column.
 	 * @param array $pieces       Content (text) from the page itself.
@@ -334,9 +528,9 @@ class CAHNRSWP_Legacy_Content_Update {
 
 		$content_types = explode( ',', $column_array );
 
-		$content .= "[column]\n\n";
+		$content = "[column]\n\n";
 
-		foreach( $content_types as $content_type ) {
+		foreach ( $content_types as $content_type ) {
 
 			// Page content.
 			if ( 'cTypePage' == substr( $content_type, 0, 9 ) ) {
