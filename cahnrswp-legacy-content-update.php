@@ -42,7 +42,7 @@ class CAHNRSWP_Legacy_Content_Update {
 			$pieces           = '';
 			$pb_content       = '';
 			$pb1_layout_meta  = get_post_meta( $post->ID, '_cahnrs_layout', true );
-			$pb1_content_meta = get_post_meta( $page->ID, '_pagebuilder_editor', true );
+			$pb1_content_meta = get_post_meta( $post->ID, '_pagebuilder_editor', true );
 			$more_tags        = (int) substr_count( $post->post_content, '<!--more-->' );
 			$wip_layout_meta  = get_post_meta( $post->ID, '_layout', true );
 			//setup_postdata( $post ); // Doesn't seem necessary
