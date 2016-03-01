@@ -139,7 +139,7 @@ class CAHNRSWP_Legacy_Content_Update {
 
 					//update_post_meta( $post->ID, '_cpb_excerpt', $pieces[0] );
 					// Set pagebuilder as on (not sure if we want to do this unless PB is enabled for posts).
-					update_post_meta( $post->ID, '_cpb_pagebuilder', 1 );
+					update_post_meta( $post->ID, '_cpb_pagebuilder', 1 ); // May not be working as intended
 
 					// Delete the meta data.
 					delete_post_meta( $post->ID, '_layout' );
@@ -436,7 +436,7 @@ class CAHNRSWP_Legacy_Content_Update {
 					$layout = 'single';
 			}
 
-			$content .= '<p>[row layout="' . $layout . '" padding="pad-ends" gutter="gutter"]';
+			$content .= '[row layout="' . $layout . '" padding="pad-ends" gutter="gutter"]';
 
 			foreach ( array_reverse( $row['columns'] ) as $column ) { // array_reverse based on export from CAHNRS...
 
@@ -454,7 +454,7 @@ class CAHNRSWP_Legacy_Content_Update {
 							} else {
 								$content .= $content_meta['content_block-' . $item['instance']];
 							}
-							$content .= '[/textblock]</br />';
+							$content .= '[/textblock]';
 						}
 
 						// Action items.
@@ -507,7 +507,7 @@ class CAHNRSWP_Legacy_Content_Update {
 
 			}
 
-			$content .= '[/row]</p>';
+			$content .= '[/row]';
 
 		}
 		
